@@ -1,6 +1,6 @@
 Student sees their enrolled classes 
 
-Student sees only their own classes 
+Student sees only their own classes. The application uses a single seeded student to establish the identity represented by the enrollment view. The slice verifies correct database relationships and presentation of that student's enrollments, but does not claim to verify user authentication or authorization. 
 
 Enrollment data comes from the database 
 
