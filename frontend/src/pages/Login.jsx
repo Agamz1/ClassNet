@@ -1,7 +1,26 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Auth.css';
+
+const getLoginError = (err) => {
+  const data = err.response?.data;
+  const apiMessage = typeof data === 'string' ? data : data?.error;
+  if (apiMessage?.toLowerCase() === 'invalid credentials') {
+    return 'We couldn’t find an account matching that username and password. Check your details, or register for a new account.';
+  }
+  if (typeof data === 'string') return data;
+  if (data && typeof data === 'object') {
+    const messages = Object.values(data).flatMap((value) =>
+      Array.isArray(value) ? value : [value]
+    );
+    if (messages.length > 0) return messages.join(' ');
+  }
+  if (err.request && !err.response) {
+    return 'Unable to reach the server. Check your connection and try again.';
+  }
+  return 'Login failed. Please check your username and password.';
+};
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -10,6 +29,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +44,7 @@ const Login = () => {
         navigate('/lecturer/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
+      setError(getLoginError(err));
     } finally {
       setLoading(false);
     }
@@ -38,8 +58,17 @@ const Login = () => {
         
         <form onSubmit={handleSubmit}>
           <h3>Login</h3>
-          
-          {error && <div className="alert alert-error">{error}</div>}
+          {location.state?.message && (
+            <div className="alert alert-success" role="status">{location.state.message}</div>
+          )}
+          {error && (
+            <div className="alert alert-error" role="alert">
+              {error}{' '}
+              {error.includes('register for a new account') && (
+                <Link to="/register">Register here</Link>
+              )}
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="username">Username</label>
@@ -72,8 +101,8 @@ const Login = () => {
 
         <div className="auth-footer">
           <p>Demo Accounts:</p>
-          <p><strong>Student:</strong> alice / password123</p>
-          <p><strong>Lecturer:</strong> dr_smith / password123</p>
+          <p><strong>Student:</strong> Greatness / U24CS1009</p>
+          <p><strong>Lecturer:</strong> Algorithm / U24CS1009</p>
           <p>
             Don't have an account? <Link to="/register">Register here</Link>
           </p>

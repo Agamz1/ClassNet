@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { courseService, enrollmentService, classSessionService, attendanceService } from '../services/api';
+import { courseService, classSessionService } from '../services/api';
 import './Dashboard.css';
 
 const StudentDashboard = () => {
@@ -23,7 +23,13 @@ const StudentDashboard = () => {
     try {
       // Fetch courses
       const coursesRes = await courseService.getMyCourses();
-      setCourses(coursesRes.data);
+      const enrolledCourses = Array.isArray(coursesRes.data)
+        ? coursesRes.data
+        : coursesRes.data.results;
+      if (!Array.isArray(enrolledCourses)) {
+        throw new Error('Unexpected courses response format');
+      }
+      setCourses(enrolledCourses);
 
       // Fetch upcoming sessions
       const sessionsRes = await classSessionService.getUpcomingSessions();
@@ -31,7 +37,7 @@ const StudentDashboard = () => {
 
       // Calculate stats
       setStats({
-        coursesCount: coursesRes.data.length,
+        coursesCount: enrolledCourses.length,
         attendancePercentage: 85, // This would be calculated from actual attendance data
       });
     } catch (err) {
