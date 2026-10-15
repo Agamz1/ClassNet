@@ -57,7 +57,7 @@ const Layout = ({ children }) => {
         </div>
       </main>
       <footer className="footer">
-        <p>&copy; 2024 ClassNet. All rights reserved.</p>
+        <p>&copy; 2026 ClassNet. All rights reserved.</p>
       </footer>
     </div>
   );
